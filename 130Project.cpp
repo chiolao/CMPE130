@@ -210,42 +210,6 @@ private:
 int main() {
 	HashTable table;
 
-	// insert 500 products
-	table.insert(car("Car1", 5));
-  	table.insert(car("Car2", 7));
-    table.insert(car("Car3", 3));
-    table.insert(car("Car4", 5));
-    table.insert(car("Car5", 6));
-    table.insert(car("Car6", 7));
-    table.insert(car("Car7", 8));
-    table.insert(car("Car8", 9));
-    table.search(0);
-    table.search(7);
-    table.search(3);
-    table.search(7);
-    //table.search("car1(distance)"
-    
-    /* 
-     table.insert(car("Car2", 2));
-     table.insert(car("Car3", 4));
-     table.insert(car("Car4", 5));
-     table.insert(car("Car5", 6));
-     table.insert(car("Car6", 7));
-     table.insert(car("Car7", 8));
-     table.insert(car("Car8", 9));
-     table.insert(car("Car9", 8));
-     table.insert(car("Car10", 8));
-     
-     table.insert(car("Car11", 8));
-    table.insert(car("Car12", 8));
-    table.insert(car("Car13", 8));
-    table.insert(car("Car14", 8));
-    table.insert(car("Car15", 8));
-    table.insert(car("Car16", 8));
-    table.insert(car("Car17", 8));
-    table.insert(car("Car18", 8));
-    table.insert(car("Car19", 8));
-    table.insert(car("Car20", 8));*/
  
 	// print the report
 	//table.report();
