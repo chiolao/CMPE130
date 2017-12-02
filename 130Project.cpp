@@ -4,22 +4,30 @@
 #include <cstring>
 #include <iostream>
 #include <string>
+#include <cstdlib>
 using namespace std;
 
 // the most things we can store in the table
-const int MAX_SIZE = 20;
+const int MAX_SIZE = 15;
 const int MAX_SIZE2 = 20;
 int currentSize =0;
 
 // a product with a code & price
-struct car {
-    car (const char* a = "", int b=0)
+struct cars {
+    
+    cars()
     {
-        strcpy(lience, a);
-        distance= b;
+        distance = 0;
+        license = "";
+    }
+    
+    cars(string s, int b)
+    {
+        license = s;
+        distance = b;
     }
 	int distance;
-	char lience[15];
+	string license;
   
 };
 
@@ -34,82 +42,94 @@ public:
 	}
 
 	// insert a product
-	void insert(car p) {
-        // hash the product
-        int floor;
-        cout << "current parking garage " ;
-        floor = whichFloor(currentSize);
-		int index = hash(p.distance);
-        
-        if(floor == 1){
-            
-            
-		// make a new node at the start of this list
-		Node* node = new Node;
-		node->car = p;
-		node->next = inventory[index];
-		inventory[index] = node;
-        
-        cout << "" <<floor << endl;
-       
- 		cout << "Inserted "<<p.lience << " distance ="<< p.distance << " at parking number" << index<<endl;
-        currentSize ++ ;
+	void insert(cars p)
+    {
+        if(currentSize == MAX_SIZE)
+        {
+            cout << "garage is full" << endl;
         }
-            else if(floor == 2){
-                
-                // make a new node at the start of this list
-                Node* node = new Node;
-                node->car = p;
-                node->next = inventory2[index];
-                inventory2[index] = node;
-                
-                cout << "" <<floor << endl;
-                
-                cout << "Inserted "<<p.lience << " distance ="<< p.distance << " at parking number" << index<<endl;
-                currentSize ++ ;
-                
-                
+        else
+        {
+            
+        
+            // hash the product
+            bool test;
+            int index = hash(p.distance);
+        
+            // make a new node at the start of this list
+            Node* node = new Node;
+            node->car = p;
+            //node->next = inventory[index];
+        
+            //cout << "" <<floor << endl;
+       
+            if(inventory[index] == NULL || inventory[index]->del == true)
+            {
+                inventory[index] = node;
+                currentSize++;
             }
+            else
+            {
+                while((inventory[index] != NULL) || (inventory[index]->del != true))
+                {
+                    index++;
+                }
+                inventory[index] = node;
+                currentSize++;
+            }
+        
+        
+            cout << "Inserted "<<p.license << " distance ="<< p.distance << " at parking number" << index<<endl;
+            currentSize ++ ;
+                
+        }
 	}
 
 
 	// lookup a product's price
-    void search (string key)
+    bool search (string key)
     {
-    /*
-        for (int i=0; i< MAX_SIZE; i++){
-            
-        if (key == i && inventory[i] !=NULL)
-            cout <<"Your key = "<<key<< " is found" << endl;
-        else   {}
-        }
-     */
-        string s, x;
+   
+        string s;
+        char c[2];
         if(key.size() == 5)
         {
-            s = key[0-3];
-            x = key[4];
+            for (int i = 0; i<4; i++)
+            {
+                s = s + key[i];
+                
+            }
+            c[1] = key[4];
         }
         else if(key.size() == 6)
         {
-            s = key[0-4];
-            x = key[5];
+            for (int i = 0; i<6; i++)
+            {
+                s = s + key[i];
+                
+            }
+            c[0] = key[5];
+            c[1] = key[6];
         }
         
-        int d = atoi(x);
+        int d;
+        d= atoi(c);
         
-        int index = //call hash function;
-        if(inventory[index].car.lience == s)
+        int index = hash (d);  //call hash function;
+        
+       if (inventory[index]->car.license == s)
         {
-            //return true;
+         
+            cout <<inventory[index]->car.license << "is found" << endl;
+            return true;
+        
         }
         else
         {
-            for(int i = 1; i < 20; i++)
-            {
-                
-            }
+            cout<< "You car is not in garage " << endl;
+            return false;
         }
+      
             
     }
 	
@@ -117,27 +137,7 @@ public:
 
 	// hash a string into am index
 	int hash(int dist) {
-        int value = 0;
-      
-        int whatFloor;
-        whatFloor = whichFloor(currentSize);
-      //  cout<<currentSize<<endl;
-    if (whatFloor == 1){
-       
-         while (inventory[value] != NULL && value <=MAX_SIZE)
-        {
-            value = dist % 20;
-        }
-        }
-        
-        else
-          {
-                while(inventory2[value] != NULL&& value <=MAX_SIZE)
-                    value = dist %20;
-                
-            }
-
-		// mod by size to prevent overflow
+        int value = dist % MAX_SIZE;
 		return value;
 	}
     
@@ -193,7 +193,13 @@ public:
 private:
 	// a node in one of our linked lists
 	struct Node {
-		car car;
+        Node()
+        {
+            car = cars();
+            next = NULL;
+            del = false;
+        }
+		cars car;
 		Node* next;
         bool del;
 
@@ -201,95 +207,21 @@ private:
 
 	// the products are all stored in an array
     
-	Node inventory[MAX_SIZE];
+	Node* inventory[MAX_SIZE];
     //Node* inventory2[MAX_SIZE2];
     //Node* floor[3];
 };
 
 // main program
 int main() {
-	HashTable table;
+	HashTable table1, table2, table3, table4, table5;
 
- 
-	// print the report
-	//table.report();
-    
-    /*do{
-        cout << "Press 1 to select a floor to view to select parking" << "\n";
-        cout << "Press 2 for the 5 nearest open parking spots on each floor" << "\n";
-        cout << "Press 3 to view all cars parked from longest to shortest time spent" << "\n";
-        cout << "Press 4 to leave the garage" << "\n";
-        cout << "Press 5 to quit" << "\n";
-        
-        cin >> x;
-        
-        if(x == 1)
-        {
-            int a = 0;
-            int b = 0;
-            string s;
-            
-            //Select a floor
-            cout << "Which floor (1-5) do you want to view?\n";
-            cin >> a;
-            cout << "Floor level " << a << ":\n";
-            test.print(a);
-            
-            
-            //Select a parking spot and give additional information
-            cout << "There are 100 total parking spots on this floor.\n";
-            cout << "Please select one of the empty parking spaces by\n";
-            cout << "entering the corresponding parking spot value (1-100).\n";
-            cin >> b;
-            //elements go from 0-99 so subtract 1
-            b = b-1;
-            
-            cout << "Please enter your car's id: \n";
-            cin >> s;
-            //cout << s;
-            car obj(s,a,b);
-            test.add(obj);
-            
-            //add insertionSortAdd function here
-            
-            
-            
-            //Add empty line space for clarity when "menu" reappears
-            cout << "\n";
-            
-        }
-        else if(x == 2)
-        {
-            test.getFiveSpaces(1);
-            test.getFiveSpaces(2);
-            test.getFiveSpaces(3);
-            test.getFiveSpaces(4);
-            test.getFiveSpaces(5);
-            cout << "\n";
-        }
-        else if(x == 3)
-        {
-            test.insertionSortView(1);
-        }
-        else if(x == 4)
-        {
-            string s;
-            cout << "Please enter your car's id\n";
-            cin >> s;
-            test.remove(s);
-            cout << "\n";
-        }
-        else{
-            if(x > 5)
-            {
-                cout << "Please press a number between 1-5" << "\n";
-                cout << "\n";
-                cout << "\n";
-            }
-        }
-        
-    }while(x != 5);*/
-
+    table1.insert(cars("car1", 5));
+     table1.insert(cars("car2", 7));
+     table1.insert(cars("car3", 6));
+     table1.insert(cars("car4", 1));
+   
+  
 	return 0;
 }
 
