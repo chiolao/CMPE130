@@ -12,6 +12,7 @@
 #include <string>
 #include <cstdlib>
 #include <iostream>
+#include <ctype.h>
 using namespace std;
 
 struct cars {
@@ -44,20 +45,25 @@ public:
 
 	//Do not edit the next three functions without telling me
 	//They are required for finding and ordering the garages/hash tables in main()
+
 	int getLocation();
 
 	int getDist();
 
+	int getSpaceLeft();
+
 	void setDist(int d);
 
-	//Do not
+	//Do not edit
 	int hash(int dist);
+
+	bool isFull();
 
 	void insert(cars p);
 
 	bool loadFactor();
 
-	bool search(string s);
+	bool search(string s, bool d);
 
 	void report();
 
@@ -87,7 +93,8 @@ private:
 	int dist;
 	//statistic variables - ignore for now
 	float alpha;
-	int counter;
+	float searchCount;
+	float totalLoop;
 
 
 
