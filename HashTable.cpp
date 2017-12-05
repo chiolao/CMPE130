@@ -13,7 +13,8 @@ HashTable::HashTable()
 	location = 0;
 	dist = 0;
 	alpha = 0;
-	counter = 0;
+	searchCount = 0;
+	totalLoop = 0;
 	inventory[0];
 }
 
@@ -24,7 +25,8 @@ HashTable::HashTable(int size, int distance)
 	location = distance;
 	dist = 0;
 	alpha = 0;
-	counter = 0;
+	searchCount = 0;
+	totalLoop = 0;
 	inventory = new Node[MAX_SIZE];
 	for (int i = 0; i < MAX_SIZE; i++)
 	{
@@ -36,11 +38,13 @@ HashTable::HashTable(int size, int distance)
 
 bool HashTable::loadFactor()
 {
-	alpha = currentSize/MAX_SIZE;
+
+	float x = currentSize;
+	float y = MAX_SIZE;
+	alpha = x/y;
+	//cout << "alpha: " << alpha << endl;
 	if(alpha > .5)
 	{
-		//counter++;
-
 		return true;
 	}
 	else
@@ -60,6 +64,11 @@ int HashTable::getDist()
 	return dist;
 }
 
+int HashTable::getSpaceLeft()
+{
+	return (MAX_SIZE - currentSize);
+}
+
 void HashTable::setDist(int d)
 {
 	 dist = d;
@@ -67,22 +76,21 @@ void HashTable::setDist(int d)
 
 int HashTable::hash(int dist)
 {
-/*    int value = dist;
-    while (inventory[value] != NULL)
-    {
-    	value = (value+1)% MAX_SIZE;
-    }*/
-
 	int value = (dist % MAX_SIZE);
 
 	return value;
 }
 
+bool HashTable::isFull()
+{
+	return (currentSize == MAX_SIZE);
+}
+
 void HashTable::insert(cars p)
 {
-	cout <<"currentSize: " << currentSize << endl;
-	cout <<"MAX_SIZE: " << MAX_SIZE << endl;
-    if(currentSize == MAX_SIZE)
+	/*cout <<"currentSize: " << currentSize << endl;
+	cout <<"location: " << location << endl;*/
+    if(currentSize >= MAX_SIZE)
     {
         cout << "garage is full" << endl;
     }
@@ -105,36 +113,69 @@ void HashTable::insert(cars p)
 			}
 			else
 			{*/
+
 				if(inventory[index].del == true)
 				{
 					inventory[index] = node;
 					inserted = true;
 				}
-				if(index++ > MAX_SIZE)
+				index++;
+				if(index > (MAX_SIZE-1))
 				{
 					index = 0;
 				}
-				else
-				{
-					index++;
-				}
-
-			//}
 		}
 
-		//currentSize++;
-
-		cout << currentSize << endl;
-		cout << "Inserted "<< p.license << " distance ="<< p.distance << " at parking number" << index <<endl;
+		//comment out during Prod release
+		//cout << currentSize << endl;
+		//cout << "Inserted "<< p.license << " distance = "<< p.distance << " at parking number " << index <<endl;
 		currentSize ++ ;
     }
 }
 
-bool HashTable::search(string key)
+bool HashTable::search(string key, bool d)
 {
+	string s, c, k, b;
+	int x, y;
 
-	string s;
-	char c[2];
+	size_t z = key.find("CMPE");
+	if(z == std::string::npos )
+	{
+		cout << "You entered the wrong key, please try again." << endl;
+		return false;
+	}
+
+	k = key.substr(z);
+
+	b = k.substr(4);
+
+	y = stoi(b);
+
+
+	s = key.substr(0,y);
+
+	if(isdigit(key[y+1]))
+	{
+		c = key.substr(y,2);
+	}
+	else
+		c = key.substr(y,1);
+
+/*	cout << "key: " << key << endl;
+	cout << "k: " << k << endl;
+	cout << "b: " << b << endl;
+	cout << "y: " << y << endl;
+	cout << "s: " << s << endl;
+	cout << "c: " << c << endl;*/
+
+
+	/*s = key.substr(0,4);
+	c = key.substr(4);*/
+	//cout << "value of s: " << s << endl;
+	//cout << "value of c: " << c << endl;
+
+//needs to be fixed
+/*	char c[2];
 	if(key.size() == 5)
 	{
 		for (int i = 0; i<4; i++)
@@ -153,40 +194,67 @@ bool HashTable::search(string key)
 		}
 		c[0] = key[5];
 		c[1] = key[6];
-	}
+	}*/
 
-	int d;
-	d= atoi(c);
+	int a;
+	//a= atoi(c);
+	a = stoi(c);
+	//cout << "value of a: " << a << endl;
 
-	int index = hash (d);  //call hash function;
+	int index = hash (a);  //call hash function;
 
-	//int index = hash(key);  //call hash function;
-	if (inventory[index].car.license == s)
+	if (inventory[index].car.license == s && d == false)
 	{
-		//cout <<inventory[index]->car.license << "is found" << endl;
-		return true;
+		if(inventory[index].del != true )
+		{
+			//cout <<inventory[index]->car.license << "is found" << endl;
+			searchCount++;
+			totalLoop++;
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 	else
 	{
 
-		index++;
-		int x = 0;
-		while(x != MAX_SIZE)
+		//index++;
+		int t = 0;
+		while(t != MAX_SIZE)
 		{
 			if (inventory[index].car.license == s)
 			{
 				//cout <<inventory[index]->car.license << "is found" << endl;
-				return true;
-			}
+				if(inventory[index].del != true && d == true)
+				{
+					inventory[index].del = d;
+					currentSize--;
+					searchCount++;
+					totalLoop = totalLoop + t + 1;
+					return true;
+				}
+				else if(inventory[index].del != true && d == false)
+				{
+					searchCount++;
+					totalLoop = totalLoop + t + 1;
+					return true;
+				}
+				else
+				{
+					cout << "reached" << endl;
+					return false;
+				}
 
-			if(index++ > MAX_SIZE)
+			}
+			if(index++ > (MAX_SIZE-1))
 			{
 				index = 0;
 			}
 			else
 			{
-				index++;
-				x++;
+				t++;
 			}
 		}
 
@@ -222,10 +290,9 @@ void HashTable::report()
     {
 
     //    cout << inventory[i] << endl;
-    }
+    }*/
 
-	cout << "The table has " << total << " elements." << endl;
-	cout << num_filled << " lists have data out of " << MAX_SIZE << " total." << endl;
-	cout << "The average filled list has " << ((float)total / num_filled) << " elements." << endl;
-	cout << "Largest list has " << max << " elements." << endl;*/
+	cout << "The garage has " << currentSize << "/" << MAX_SIZE << " cars." << endl;
+	cout << "The total searches have resulted in a " << searchCount/totalLoop*100 << "% success rate." << endl;
+
 }

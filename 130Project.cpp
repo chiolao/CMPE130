@@ -6,27 +6,28 @@
 
 // main program
 int main() {
-	HashTable table1(3, 10), table2(3, 20), table3(3, 30), table4(3, 40), table5(3, 50);
+	HashTable table1(20, 10), table2(20, 20), table3(3, 30), table4(3, 40), table5(3, 50);
 
-	HashTable ary1[5] = {table1, table2, table3, table4, table5};
+	HashTable *ary1[5] = {&table1, &table2, &table3, &table4, &table5};
 
 	table1.insert(cars("car1", 5));
 	table1.insert(cars("car2", 5));
-    table1.insert(cars("car3", 6));
-    table1.insert(cars("car4", 1));
+	table1.insert(cars("car3", 6));
+    table2.insert(cars("car4", 21));
+    table2.insert(cars("car5", 15));
+    //table2.insert(cars("car6", 18));
 
 	int choice;
 	do {
 		cout << "Press 1 to find parking" << "\n";
-		cout << "Press 2 to search for your car" << "\n";
-		cout << "Press 3 to leave the garage" << "\n";
-		cout << "Press 4 to show the information of a parking lot" << "\n";
-		cout << "Press 5 to exit the program" << "\n";
+		cout << "Press 2 to search for your car." << "\n";
+		cout << "Press 3 to show the information of a parking lot" << "\n";
+		cout << "Press 4 to exit the program" << "\n";
 		cin >> choice;
 
 		if (choice == 1)
 		{
-			HashTable ary2[5], temp;
+			HashTable *ary2[5], *temp;
 			string lic, s;
 			int dis, j;
 
@@ -35,6 +36,7 @@ int main() {
 			cout << "what is your distance" << endl;
 			cin >> dis;
 
+			//only uncomment if you are using c-string
 			/*char cstr[15];
 			for (int i = 0; i < 15; i++)
 			{
@@ -46,7 +48,7 @@ int main() {
 			//I stored the tables in an array so we can easily access the closest garages.
 			for(int i = 0; i < 5; i++)
 			{
-				ary1[i].setDist(abs(ary1[i].getLocation() - dis));
+				ary1[i]->setDist(abs(ary1[i]->getLocation() - dis));
 				if(i == 0)
 				{
 					ary2[i] = ary1[i];
@@ -56,106 +58,195 @@ int main() {
 					ary2[i] = ary1[i];
 					temp = ary2[i];
 					j = i - 1;
-					while (j >= 0 && ary2[j].getDist() > temp.getDist())
+					while (j >= 0 && ary2[j]->getDist() > temp->getDist())
 					{
 						ary2[j+1] = ary2[j];
 						j = j-1;
 					}
 					ary2[j+1] = temp;
 				}
+
 			}
 
 			//Recall that load factor is how full a hash table is.
 			//Right now I have it set to .5 (half full), but if you want to tweak this value just look in HashTable.cpp loadFactor()
-			if(ary2[1].loadFactor() == true)
+			if(ary2[0]->isFull() == true)
+			{
+				cout << "The nearest parking garage is full." << endl;
+				cout << "Do you want to be redirected to the next nearest garage?(y/n)" << endl;
+				cin >> s;
+
+				if( s == "n") cout << "Sorry for being unable to satisfy your needs. Please use our app again later as parking spaces may have become available then" << endl;
+			}
+			else if((ary2[0]->loadFactor() != true) && (ary2[0]->isFull() != true))
+			{
+				ary2[0]->insert(cars(lic, dis));
+				cout << "Your car has been inserted" << endl;
+
+				string key = to_string(ary2[0]->getLocation()) + lic + to_string(dis) + "CMPE" + to_string(lic.length());
+				cout << "Your recipt(key) is " << key << " , and you can use it for search or delete" << endl;
+			}
+			else if((ary2[0]->loadFactor() == true) && (ary2[0]->isFull() != true))
 			{
 				cout << "The nearest parking garage has limited space left." << endl;
 				cout << "To reduce the chances of parking problems we recommend parking in the next nearest garage" << endl;
-				cout << "Do you want to be redirected?(Y/N)" << endl;
+				cout << "Do you want to be redirected?(y/n)" << endl;
 				cin >> s;
 
-				if(s == "Y")
+				if(s == "n")
 				{
-					ary2[2].insert(cars(lic, dis));
+					ary2[0]->insert(cars(lic, dis));
+					cout << "Your car has been inserted" << endl;
+
+					string key = to_string(ary2[0]->getLocation()) + lic + to_string(dis) + "CMPE" + to_string(lic.length());
+					cout << "Your recipt(key) is " << key << " , and you can use it for search or delete" << endl;
 				}
 			}
-			else
+
+			if(s == "y")
 			{
-				ary2[1].insert(cars(lic, dis));
-				cout << "Your car has been inserted" << endl;
+				if(ary2[1]->isFull() == true && ary2[1]->isFull() == true && ary2[2]->isFull() == true && ary2[3]->isFull() == true && ary2[4]->isFull() == true)
+				{
+					cout << "Well this is embarrassing, all garages are full." << endl;
+					cout << "Sorry for being unable to satisfy your needs. Please use our app again later as parking spaces may have become available then" << endl;
+				}
+				else if(ary2[1]->isFull() == true)
+				{
+					cout << "Well this is embarrassing, the 2nd nearest garage is full." << endl;
+					cout << "To prevent this from happening again here are the next three nearest garages and their distances from your destination and available space:" << endl;
+					cout << "Third nearest garage is " << ary2[2]->getDist() << " miles from your destination." << "It has " << ary2[2]->getSpaceLeft() << " spaces left." << endl;
+					cout << "Fourth nearest garage is " << ary2[3]->getDist() << " miles from your destination." << "It has " << ary2[3]->getSpaceLeft() << " spaces left." << endl;
+					cout << "Fifth nearest garage is " << ary2[4]->getDist() << " miles from your destination." << "It has " << ary2[4]->getSpaceLeft() << " spaces left." << endl;
+					cout << "If you would like to be redirected to one of the garages above enter: 3, 4, or 5" << endl;
+					cout << "Otherwise, if you would like to find your own parking space enter: n" << endl;
+					cin >> s;
 
-				//Need to install patch for compiler, string based functions are not complete b/c I get compiler errors due to a package error.
-				//First 2-3 elements of the string reserved for garage location(int value) so we can determine which garage to parse as seen below.
-				//Using the idea below we can now have an unrestricted license plate string, ill update the search function latter.
+					if( s == "n") cout << "Sorry for being unable to satisfy your needs. Please use our app again later as parking spaces may have become available then" << endl;
+					else if(s == "3")
+					{
+						ary2[2]->insert(cars(lic, dis));
+						cout << "Your car has been inserted" << endl;
 
-				//string key = to_string(ary2[1].getLocation) + lic + to_string(dis);
-				//cout << "Your recipt(key) is " << key << " , and you can use it for search or delete" << endl;
+						string key = to_string(ary2[2]->getLocation()) + lic + to_string(dis) + "CMPE" + to_string(lic.length());
+						cout << "Your recipt(key) is " << key << " , and you can use it for search or delete" << endl;
+					}
+					else if(s == "4")
+					{
+						ary2[3]->insert(cars(lic, dis));
+						cout << "Your car has been inserted" << endl;
+
+						string key = to_string(ary2[3]->getLocation()) + lic + to_string(dis) + "CMPE" + to_string(lic.length());
+						cout << "Your recipt(key) is " << key << " , and you can use it for search or delete" << endl;
+					}
+					else if(s == "5")
+					{
+						ary2[4]->insert(cars(lic, dis));
+						cout << "Your car has been inserted" << endl;
+
+						string key = to_string(ary2[4]->getLocation()) + lic + to_string(dis) + "CMPE" + to_string(lic.length());
+						cout << "Your recipt(key) is " << key << " , and you can use it for search or delete" << endl;
+					}
+				}
+				else
+				{
+					ary2[1]->insert(cars(lic, dis));
+					cout << "Your car has been inserted" << endl;
+
+					string key = to_string(ary2[1]->getLocation()) + lic + to_string(dis) + "CMPE" + to_string(lic.length());
+					cout << "Your recipt(key) is " << key << " , and you can use it for search or delete" << endl;
+				}
+
 			}
 
-/*			table.insert(car(cstr, dis));
-			cout << "Your car has been inserted" << endl;
-			string key = lic + to_string(dis);
-			cout << "Your recipt(key) is " << key << " , and you can use it for search or delete" << endl;*/
 
+			cout << endl;
 		}
-				else if (choice == 2) //assume that search function already has the output according to the result: found or not found
+		else if (choice == 2) //assume that search function already has the output according to the result: found or not found
 		{
-			string key1, key2, s;
+			string key1, key2, s, x;
+			bool d = false;
 			int garage;
 			cout << "What is your key?" << endl;
 			cin >> key1;
+			cout << "Are you leaving?(y/n)" << endl;
+			cin >> x;
 
-			if(key1.length() == 8)
+			if(x == "y") d = true;
+
+			//only uncomment if there will be garages 100+miles away included
+			/*if(isdigit(key1[2]))
+			{
+				s = key1.substr(0,3);
+				key2 = key1.substr(3);
+			}*/
+
+			if(isdigit(key1[1]))
 			{
 				s = key1.substr(0,2);
 				key2 = key1.substr(2);
 			}
-			if(key1.length() == 9)
+			else
 			{
-				s = key1.substr(0,3);
-				key2 = key1.substr(3);
+				s = key1.substr(0,1);
+				key2 = key1.substr(1);
 			}
 
-			//Use stoi for string to int
-			//use atoi for c-string to int
-			garage = std::stoi(s);
-			//garage = std::atoi(s);
-
-			HashTable temp;
-
-			for(int i = 0; i < 5; i++)
+			if(isdigit(key1[0]))
 			{
-				if(ary1[i].getLocation() == garage)
+				//Use stoi for string to int
+				//use atoi for c-string to int
+				garage = stoi(s);
+				//garage = atoi(s);
+				if(ary1[0]->getLocation() == garage || ary1[1]->getLocation() == garage || ary1[2]->getLocation() == garage || ary1[3]->getLocation() == garage || ary1[4]->getLocation() == garage)
 				{
-					temp = ary1[i];
+					HashTable *temp;
+
+					for(int i = 0; i < 5; i++)
+					{
+						if(ary1[i]->getLocation() == garage)
+						{
+							temp = ary1[i];
+						}
+					}
+
+					if (temp->search(key2, d) == 1)
+					{
+						cout << "The car was found" << endl;
+						if(d == true) cout << "Your car was successfully removed from the system. Thank you for using our app" <<  endl;
+
+					}
+					else
+					{
+						cout << "The system cannot find the car" << endl;
+					}
 				}
-			}
-
-			if (temp.search(key2))
-			{
-				cout << "The car is found" << endl; //how to output the location of the car
-
+				else
+				{
+					cout << "You entered the wrong key, please try again." << endl;
+				}
 			}
 			else
 			{
-				cout << "The system cannot find the car" << endl;
+				cout << "You entered the wrong key, please try again." << endl;
 			}
 
+			cout << endl;
 
 		}
-/*		else if (choice == 3)
+
+		else if (choice == 3)
 		{
-			cout << "what car you want to delete?" << endl;
-			table.delete(key); //assumue we have the delete function with the parameter as key. the delete function has the output showing if is successful or not
+			//cout << "Under construction - ignore" << endl;
+			table1.report();
+			table2.report();
+			table3.report();
+			table4.report();
+			table5.report();
+
+			cout << endl;
 		}
 
-		//do not write a code for this before asking me I have this under development - Arthur
-		else if (choice == 4)
-		{
-			cout << "The overall information of the parking lot will be givn as followed" << endl;
-			//table.report(); // dont know what type of function of showing information, assume its a void function and show the overall information
-		}*/
-	} while (choice != 5);
+	} while (choice != 4);
 
 		return 0;
 }
